@@ -5,6 +5,7 @@ import * as express from 'express';
 
 import * as React from 'react';
 import * as ReactDOMServer from 'react-dom/server';
+import {StaticRouter} from 'react-router';
 
 import App from './App';
 
@@ -33,9 +34,22 @@ app.get('*', (req, res) => {
     const html = path.join(__dirname, '../build/index.html');
     const htmlData = fs.readFileSync(html).toString();
 
-    const ReactApp = ReactDOMServer.renderToString(React.createElement(App));
-    const renderedHtml = htmlData.replace('{{SSR}}', ReactApp);
-    res.status(200).send(renderedHtml);
+    const context: {url?: string}  = {};
+
+    const ReactApp = ReactDOMServer.renderToString(
+        React.createElement(
+            StaticRouter,
+            {location: req.url, context: context},
+            React.createElement(App)
+        )
+    );
+    
+    if (context.url) {
+        res.redirect(301, '/');
+    } else {
+        const renderedHtml = htmlData.replace('{{SSR}}', ReactApp);
+        res.status(200).send(renderedHtml);
+    }
 });
 
 server.listen(3000);
