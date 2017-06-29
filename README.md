@@ -1,1 +1,1 @@
-### react-ts-ssr-basic-cra
+### react-ts-ssr-router-cra
